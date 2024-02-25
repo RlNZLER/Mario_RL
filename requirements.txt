@@ -19,6 +19,7 @@ ament-uncrustify==0.12.10
 ament-xmllint==0.12.10
 angles==1.15.0
 astra-camera-msgs==1.0.1
+asttokens==2.4.1
 AutoROM==0.4.2
 AutoROM.accept-rom-license==0.6.1
 bond==3.0.2
@@ -29,6 +30,7 @@ certifi==2024.2.2
 charset-normalizer==3.3.2
 click==8.1.7
 cloudpickle==3.0.0
+comm==0.2.1
 composition-interfaces==1.2.1
 contourpy==1.2.0
 control-msgs==4.4.0
@@ -36,6 +38,8 @@ controller-manager==2.39.1
 controller-manager-msgs==2.39.1
 cv-bridge==3.2.1
 cycler==0.12.1
+debugpy==1.8.1
+decorator==5.1.1
 demo-nodes-py==0.20.3
 diagnostic-msgs==4.2.3
 diagnostic-updater==3.1.2
@@ -49,6 +53,8 @@ examples-rclpy-minimal-client==0.15.1
 examples-rclpy-minimal-publisher==0.15.1
 examples-rclpy-minimal-service==0.15.1
 examples-rclpy-minimal-subscriber==0.15.1
+exceptiongroup==1.2.0
+executing==2.0.1
 exploration-behavior==0.0.0
 filelock==3.13.1
 find-object-2d==0.7.0
@@ -65,9 +71,14 @@ idna==3.6
 image-geometry==3.2.1
 importlib-resources==6.1.1
 interactive-markers==2.3.2
+ipykernel==6.29.2
+ipython==8.22.1
+jedi==0.19.1
 Jinja2==3.1.3
 joint-state-publisher==2.4.0
 joint-state-publisher-gui==2.4.0
+jupyter_client==8.6.0
+jupyter_core==5.7.1
 kiwisolver==1.4.5
 laser-geometry==2.4.0
 launch==1.0.5
@@ -85,6 +96,7 @@ map-msgs==2.1.0
 Markdown==3.5.2
 MarkupSafe==2.1.5
 matplotlib==3.8.3
+matplotlib-inline==0.1.6
 message-filters==4.3.3
 moveit-configs-utils==2.5.5
 moveit-msgs==2.2.1
@@ -95,6 +107,7 @@ nav2-common==1.1.13
 nav2-msgs==1.1.13
 nav2-simple-commander==1.0.0
 nes-py==8.2.1
+nest-asyncio==1.6.0
 networkx==3.2.1
 numpy==1.26.4
 nvidia-cublas-cu12==12.1.3.1
@@ -116,17 +129,25 @@ opencv-python==4.9.0.80
 osrf-pycommon==2.0.2
 packaging==23.2
 pandas==2.2.1
+parso==0.8.3
 pcl-msgs==1.0.0
 pendulum-msgs==0.20.3
+pexpect==4.9.0
 pillow==10.2.0
+platformdirs==4.2.0
+prompt-toolkit==3.0.43
 protobuf==3.19.6
 psutil==5.9.8
+ptyprocess==0.7.0
+pure-eval==0.2.2
 pyglet==1.5.21
+Pygments==2.17.2
 pyparsing==3.1.1
 python-dateutil==2.8.2
 python-qt-binding==1.1.2
 pytz==2024.1
 PyYAML==6.0.1
+pyzmq==25.1.2
 qt-dotgraph==2.2.3
 qt-gui==2.2.3
 qt-gui-cpp==2.2.3
@@ -201,6 +222,7 @@ smclib==3.0.2
 srdfdom==2.0.4
 sros2==0.10.4
 stable-baselines3==1.6.0
+stack-data==0.6.3
 statistics-msgs==1.2.1
 std-msgs==4.2.3
 std-srvs==4.2.3
@@ -209,6 +231,7 @@ sympy==1.12
 teleop-twist-keyboard==2.3.2
 tensorboard==2.16.2
 tensorboard-data-server==0.7.2
+tensordict==0.3.0
 tf-transformations==1.0.0
 tf2-geometry-msgs==0.25.6
 tf2-kdl==0.25.6
@@ -219,7 +242,12 @@ tf2-tools==0.25.6
 theora-image-transport==2.5.0
 topic-monitor==0.20.3
 torch==2.2.1
+torchaudio==2.2.1
+torchrl==0.3.0
+torchvision==0.17.1
+tornado==6.4
 tqdm==4.66.2
+traitlets==5.14.1
 trajectory-msgs==4.2.3
 triton==2.2.0
 turtlebot3-example==2.1.5
@@ -236,6 +264,7 @@ urllib3==2.2.1
 visualization-msgs==4.2.3
 voice-control==0.0.0
 waypoint-follower==0.0.0
+wcwidth==0.2.13
 Werkzeug==3.0.1
 xacro==2.0.8
 yolov8-object-detection==0.0.0
