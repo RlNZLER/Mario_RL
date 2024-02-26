@@ -24,3 +24,5 @@ Steps:
 9. pip install gym==0.21.0
 10. pip install stable-baselines3[extra]==1.6.0
 11. pip freeze > requirements.txt
+12. pip install -r requirements.txt
+
