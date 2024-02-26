@@ -7,6 +7,8 @@ The following simulator, but only version SuperMarioBros2-v1, will be used to pl
 
 [Double Deep Q-Networks](https://pytorch.org/tutorials/intermediate/mario_rl_tutorial.html)
 
+[SuperMarioBros-AI](https://github.com/Chrispresso/SuperMarioBros-AI)
+
 You are required to use your knowledge acquired in the module regarding DRL agents, and knowledge acquired from additional recommended readings. This will be useful to investigate the performance of those agents and to compare and criticise them so you can recommend your best agent. You are expected to evaluate your agents using metrics such as Avg. Reward, Avg. Game Score, Avg. Steps Per Episode, and Training and Test Times – and any others that you consider relevant. You are expected to train at least three different agents, which can differ in their state representation (CNN, Transformer, CNN-Transformer) and/or different learning algorithms or training methodologies. Once you have decided on the agents that you want to report, you should train them with multiple seeds and average their results—to reduce the potential noise (due to randomness) in the performance of your models. If you report learning curves, they should be based on those average results instead of using a single seed (run). You are expected to justify your choices in terms of architectures, hyperparameters and algorithms. 
 
 In this assignment, you are free to train any DRL agent, in any programming language, to preprocess the data, and to implement your solutions whenever possible. While you are free to use libraries such as PFRL, StableBaselines or Pearl (among others), you should mention your resources used, acknowledge them appropriately, and compare between agents in your report.
