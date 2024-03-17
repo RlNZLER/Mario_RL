@@ -47,3 +47,32 @@ Here's a suggested approach to tackle this assignment:
 7. **Acknowledge Resources Used**: Make sure to acknowledge any libraries, frameworks, or resources you used in your experiments, such as PFRL, StableBaselines, or other DRL libraries. Mention any additional readings or resources that influenced your approach.
 
 By following these steps and conducting thorough experiments, you'll be able to fulfill the requirements of your assignment and gain valuable insights into training DRL agents to play the Super Mario Bros game autonomously. Good luck with your assignment! If you have any further questions or need assistance along the way, feel free to ask.
+
+In the context of training a reinforcement learning model for Super Mario Bros, Proximal Policy Optimization (PPO) stands out as a stable and efficient choice, balancing simplicity with effectiveness.
+
+After Proximal Policy Optimization (PPO), the next two algorithms that could be recommended for training a reinforcement learning model for Super Mario Bros are:
++ **DQN (Deep Q-Network):** Effective for discrete action spaces, DQN is a classic algorithm that can handle complex environments like Super Mario Bros. It is known for its ability to learn from raw pixels and make decisions based on Q-values, which represent the value of taking a specific action in a given state.
+
++ **SAC (Soft Actor-Critic):** SAC is another strong choice, especially for environments with continuous action spaces like Super Mario Bros. It is robust and efficient, making it suitable for complex tasks where precision in action selection is crucial.
+
+
+Yes, it is possible to combine two algorithms together, especially in the context of machine learning and deep learning models. One common approach is through ensemble learning, where multiple models are combined to improve predictive performance. Here are some methods to combine algorithms effectively:
+
+1. **Averaging Method**: This involves taking the average of predictions from different models. It is a straightforward way to combine models and can lead to improved accuracy.
+
+2. **Weighted Average Method**: Similar to averaging, but with different weights assigned to each model based on their performance. This method allows for more flexibility in combining models.
+
+3. **Bagging Method**: In this method, multiple iterations of the same model are combined by training them on different datasets. This helps reduce bias and improve overall performance.
+
+4. **Boosting Method**: Boosting uses a feedback loop where the performance of one model influences subsequent models. This iterative process helps refine the model and reduce errors.
+
+5. **Concatenation Method**: Used when merging different data sources into the same model, this technique combines inputs from various sources by concatenating them. However, care must be taken to avoid overfitting and loss of critical information.
+
+By combining algorithms using these methods, it is possible to create more robust and accurate models that leverage the strengths of each individual algorithm.
+
+Citations:
+[1] https://www.knowledgehut.com/blog/data-science/combining-models-machine-learning-with-python
+[2] https://control.com/technical-articles/combining-two-deep-learning-models/
+[3] https://stackoverflow.com/questions/56544704/time-complexity-of-two-algorithms-running-together
+[4] https://en.wikipedia.org/wiki/Merge_algorithm
+[5] https://crypto.stackexchange.com/questions/10329/combining-multiple-symmetric-encryption-algorithms-implications
