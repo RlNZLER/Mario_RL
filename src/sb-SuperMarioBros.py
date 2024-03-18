@@ -67,9 +67,9 @@ environment = make_env(environmentID, seed)
 # note: exploration_fraction=0.9 means that it will explore 90% of the training steps
 if learningAlg == "DQN":
     model = DQN("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, buffer_size=50000, exploration_fraction=0.9, verbose=1)
-elif learningAlg == "DQN":
+elif learningAlg == "A2C":
     model = A2C("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1)
-elif learningAlg == "DQN":
+elif learningAlg == "PPO":
     model = PPO("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1)
 else:
     print("UNKNOWN learningAlg="+str(learningAlg))
