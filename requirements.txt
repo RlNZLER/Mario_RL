@@ -506,6 +506,6 @@ wsproto==1.2.0
 xacro==2.0.8
 xdg==5
 xkit==0.0.0
-ydlidar @ file:///home/rinzler/limo_ros2/YDLidar-SDK
+ydlidar==1.6
 yolov8-object-detection==0.0.0
 zipp==1.0.0
