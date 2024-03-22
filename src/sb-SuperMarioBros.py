@@ -7,6 +7,8 @@
 #
 # Although the dependencies have been installed in the PCs of the labs. You may 
 # should be aware the following in case of installation in your own PCs:
+# pip install tensorflow[and-cuda]==2.15.1
+
 # pip install nes-py
 # pip install gym-super-mario-bros==7.3.0
 # pip install setuptools==65.5.0 "wheel<0.40.0"
@@ -43,7 +45,7 @@ trainMode = True if sys.argv[1] == 'train' else False
 learningAlg = sys.argv[2] 
 seed = random.randint(0,1000) if trainMode else int(sys.argv[3])
 policyFileName = learningAlg+"-"+environmentID+"-seed"+str(seed)+".policy.pkl"
-num_training_steps = 500000
+num_training_steps = 10000
 num_test_episodes = 10
 learning_rate = 0.00083
 gamma = 0.995
