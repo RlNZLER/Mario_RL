@@ -28,6 +28,7 @@ import gym
 import time 
 import pickle
 import random
+import datetime 
 from typing import Callable
 from stable_baselines3 import DQN,A2C,PPO
 from stable_baselines3.common.evaluation import evaluate_policy
@@ -40,7 +41,9 @@ from stable_baselines3.common import atari_wrappers
 # log training results to CSV
 log_filename = "training_log.csv"
 
-def log_training_results(algorithm, learning_rate, gamma, num_training_steps, mean_reward, std_reward, training_time):
+def log_training_results(algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, training_time):
+    # Get current timestamp
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     # Write results to CSV
     with open(log_filename, mode='a', newline='') as file:
         writer = csv.writer(file)
@@ -48,9 +51,9 @@ def log_training_results(algorithm, learning_rate, gamma, num_training_steps, me
         file.seek(0, 2)
         if file.tell() == 0:
             # If empty, write header
-            writer.writerow(["Algorithm", "Learning Rate","Gamma", "No. of training steps", "Mean Reward", "Std Reward", "Training Time"])
+            writer.writerow(["Timestamp", "Algorithm", "Seed", "Learning Rate","Gamma", "No. of training steps", "Mean Reward", "Std Reward", "Training Time"])
         # Write data to CSV
-        writer.writerow([algorithm, learning_rate, gamma, num_training_steps, mean_reward, std_reward, training_time])
+        writer.writerow([timestamp, algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, training_time])
 
 if len(sys.argv)<2 or len(sys.argv)>4:
     print("USAGE: sb-SuperMarioBros2-v1.py (train|test) (DQN|A2C|PPO) [seed_number]")
@@ -140,4 +143,4 @@ while True and policy_rendering:
 env.close()
 
 if trainMode:
-    log_training_results(learningAlg, learning_rate, gamma, num_training_steps, mean_reward, std_reward, training_time)
+    log_training_results(learningAlg, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, training_time)
