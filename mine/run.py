@@ -45,11 +45,12 @@ class LunarLanderGUI:
     def submit(self):
         mode = self.mode_var.get().lower()
         algorithm = self.algorithm_var.get().upper()
+        seed = 123  # Set a default seed here or ask user for seed input
         self.master.destroy()
         if mode == "train":
             sys.argv = [sys.argv[0], "train", algorithm]
         elif mode == "test":
-            sys.argv = [sys.argv[0], "test", algorithm]
+            sys.argv = [sys.argv[0], "test", algorithm, str(seed)]  # Change str(seed) to the seed input if asked
         else:
             print("Invalid mode selected.")
             return

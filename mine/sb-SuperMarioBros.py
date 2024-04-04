@@ -25,6 +25,7 @@
 import csv
 import sys
 import gym
+import time 
 import pickle
 import random
 from tqdm import tqdm
@@ -40,7 +41,7 @@ from stable_baselines3.common import atari_wrappers
 # log training results to CSV
 log_filename = "training_log.csv"
 
-def log_training_results(algorithm, learning_rate, gamma, num_training_steps, mean_reward, std_reward):
+def log_training_results(algorithm, learning_rate, gamma, num_training_steps, mean_reward, std_reward, training_time):
     # Write results to CSV
     with open(log_filename, mode='a', newline='') as file:
         writer = csv.writer(file)
@@ -48,21 +49,19 @@ def log_training_results(algorithm, learning_rate, gamma, num_training_steps, me
         file.seek(0, 2)
         if file.tell() == 0:
             # If empty, write header
-            writer.writerow(["Algorithm", "Learning Rate","Gamma", "No. of traing steps", "Mean Reward", "Std Reward"])
+            writer.writerow(["Algorithm", "Learning Rate","Gamma", "No. of training steps", "Mean Reward", "Std Reward", "Training Time"])
         # Write data to CSV
-        writer.writerow([algorithm, learning_rate, gamma, num_training_steps, mean_reward, std_reward])
-
+        writer.writerow([algorithm, learning_rate, gamma, num_training_steps, mean_reward, std_reward, training_time])
 
 if len(sys.argv)<2 or len(sys.argv)>4:
-    print("USAGE: sb-SuperMarioBros2-v1.py (train|test) (DQN|A2C|PPO)")
+    print("USAGE: sb-SuperMarioBros2-v1.py (train|test) (DQN|A2C|PPO) [seed_number]")
     exit(0)
 
 environmentID = "SuperMarioBros2-v1"
 trainMode = True if sys.argv[1] == 'train' else False
 learningAlg = sys.argv[2] 
-# seed = random.randint(0,1000) if trainMode else int(sys.argv[3])
-# policyFileName = learningAlg+"-"+environmentID+"-seed"+str(seed)+".policy.pkl"
-policyFileName = learningAlg+"-"+environmentID+".policy.pkl"
+seed = random.randint(0,1000) if trainMode else int(sys.argv[3])
+policyFileName = learningAlg+"-"+environmentID+"-seed"+str(seed)+".policy.pkl"
 num_training_steps = 100_000
 num_test_episodes = 10
 learning_rate = 0.00083
@@ -70,41 +69,38 @@ gamma = 0.995
 policy_rendering = True
 
 # create the learning environment 
-def make_env(gym_id):
-    seed = random.randint(0, 1000)
+def make_env(gym_id, seed):
     env = gym_super_mario_bros.make(gym_id)
     env = JoypadSpace(env, RIGHT_ONLY)
     env = atari_wrappers.MaxAndSkipEnv(env, 4)
     env = atari_wrappers.NoopResetEnv(env, noop_max=30)
     env = atari_wrappers.ClipRewardEnv(env)
-    env.seed(seed)
+    env.seed(seed)	
     env.action_space.seed(seed)
     env.observation_space.seed(seed)
-    return env, seed
+    return env
 
-environment, seed = make_env(environmentID)
+environment = make_env(environmentID, seed)
 
 # create the agent's model using one of the selected algorithms
 # note: exploration_fraction=0.9 means that it will explore 90% of the training steps
 if learningAlg == "DQN":
-    model = DQN("CnnPolicy", environment, learning_rate=learning_rate, gamma=gamma, buffer_size=50000, exploration_fraction=0.9, verbose=1)
+    model = DQN("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, buffer_size=50000, exploration_fraction=0.9, verbose=1)
 elif learningAlg == "A2C":
-    model = A2C("CnnPolicy", environment, learning_rate=learning_rate, gamma=gamma, verbose=1)
+    model = A2C("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1)
 elif learningAlg == "PPO":
-    model = PPO("CnnPolicy", environment, learning_rate=learning_rate, gamma=gamma, verbose=1)
+    model = PPO("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1)
 else:
     print("UNKNOWN learningAlg="+str(learningAlg))
     exit(0)
 
 # train the agent or load a pre-trained one
 if trainMode:
-    progress_bar = tqdm(total=num_training_steps, desc='Training Progress')
-    for _ in range(num_training_steps):
-        environment, seed = make_env(environmentID)
-        model.set_env(environment)
-        model.learn(total_timesteps=1, reset_num_timesteps=False)
-        progress_bar.update(1)  # Update progress bar after each training step
-    progress_bar.close()
+    start_time = time.time()  # Start measuring training time
+    model.learn(total_timesteps=num_training_steps, progress_bar=True)
+    
+    end_time = time.time() # Stop measuring training time
+    training_time = end_time - start_time  # Calculate training time
     
     print("Saving policy "+str(policyFileName))
     pickle.dump(model.policy, open(policyFileName, 'wb'))
@@ -145,4 +141,4 @@ while True and policy_rendering:
 env.close()
 
 if trainMode:
-    log_training_results(learningAlg, learning_rate, gamma, num_training_steps, mean_reward, std_reward)
+    log_training_results(learningAlg, learning_rate, gamma, num_training_steps, mean_reward, std_reward, training_time)
