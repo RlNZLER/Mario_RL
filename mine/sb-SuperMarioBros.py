@@ -60,7 +60,7 @@ environmentID = "SuperMarioBros2-v1"
 trainMode = True if sys.argv[1] == 'train' else False
 learningAlg = sys.argv[2] 
 seed = random.randint(0,1000) if trainMode else int(sys.argv[3])
-policyFileName = learningAlg+"-"+environmentID+"-seed"+str(seed)+".policy.pkl"
+policyFileName = "policy/"+learningAlg+"-"+environmentID+"-seed"+str(seed)+".policy.pkl"
 num_training_steps = 100_000
 num_test_episodes = 10
 learning_rate = 0.00083
