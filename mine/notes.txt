@@ -1,0 +1,2 @@
+1. Make the code run of random seed for each episode so that no need to average different models.
+2. Convert the env to grey scale.
