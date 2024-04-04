@@ -38,12 +38,14 @@ from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT, RIGHT_ONLY
 from stable_baselines3.common import atari_wrappers
 
-# log training results to CSV
-log_filename = "training_log.csv"
 
 def log_training_results(algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, training_time):
+    # log training results to CSV
+    log_filename = "training_log.csv"
+    
     # Get current timestamp
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
     # Write results to CSV
     with open(log_filename, mode='a', newline='') as file:
         writer = csv.writer(file)
@@ -64,7 +66,7 @@ trainMode = True if sys.argv[1] == 'train' else False
 learningAlg = sys.argv[2] 
 seed = random.randint(0,1000) if trainMode else int(sys.argv[3])
 policyFileName = "policy/"+learningAlg+"-"+environmentID+"-seed"+str(seed)+".policy.pkl"
-num_training_steps = 100_000
+num_training_steps = 10_000
 num_test_episodes = 10
 learning_rate = 0.00083
 gamma = 0.995

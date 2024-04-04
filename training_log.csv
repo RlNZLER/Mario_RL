@@ -1,0 +1,2 @@
+Timestamp,Algorithm,Seed,Learning Rate,Gamma,No. of training steps,Mean Reward,Std Reward,Training Time
+2024-04-04 18:15:48,DQN,621,0.00083,0.995,10000,92.94,21.61888988824357,69.41965126991272
