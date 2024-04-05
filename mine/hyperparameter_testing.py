@@ -11,12 +11,19 @@ import pickle
 import random
 import datetime
 import optuna
+import torch
+import numpy as np
+from gym.spaces import Box
+from torchvision import transforms as T
 from stable_baselines3 import DQN, A2C, PPO
 from stable_baselines3.common.evaluation import evaluate_policy
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import RIGHT_ONLY
-from stable_baselines3.common import atari_wrappers
+
+from stable_baselines3.common.callbacks import BaseCallback
+from stable_baselines3.common.atari_wrappers import MaxAndSkipEnv, NoopResetEnv, ClipRewardEnv
+from stable_baselines3.common.vec_env import VecFrameStack, DummyVecEnv
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -26,7 +33,65 @@ N_TRIALS = 3
 N_TIMESTEPS = int(2e4)
 N_EVAL_EPISODES = 5
 ENV_ID = "SuperMarioBros2-v1"
+EVAL_FREQ = 4000  # Frequency of evaluations within each trial
 
+class GrayScaleObservation(gym.ObservationWrapper):
+    def __init__(self, env):
+        super().__init__(env)
+        obs_shape = self.observation_space.shape[:2]
+        self.observation_space = Box(low=0, high=255, shape=obs_shape, dtype=np.uint8)
+
+    def permute_orientation(self, observation):
+        # permute [H, W, C] array to [C, H, W] tensor
+        observation = np.transpose(observation, (2, 0, 1))
+        observation = torch.tensor(observation.copy(), dtype=torch.float)
+        return observation
+
+    def observation(self, observation):
+        observation = self.permute_orientation(observation)
+        transform = T.Grayscale()
+        observation = transform(observation)
+        return observation
+
+
+class ResizeObservation(gym.ObservationWrapper):
+    def __init__(self, env, shape):
+        super().__init__(env)
+        if isinstance(shape, int):
+            self.shape = (shape, shape)
+        else:
+            self.shape = tuple(shape)
+
+        obs_shape = self.shape + self.observation_space.shape[2:]
+        self.observation_space = Box(low=0, high=255, shape=obs_shape, dtype=np.uint8)
+
+    def observation(self, observation):
+        transforms = T.Compose(
+            [T.Resize(self.shape, antialias=True), T.Normalize(0, 255)]
+        )
+        observation = transforms(observation).squeeze(0)
+        return observation
+
+class OptunaCallback(BaseCallback):
+    def __init__(self, trial, eval_env, n_eval_episodes=N_EVAL_EPISODES, eval_freq=EVAL_FREQ, verbose=1):
+        super(OptunaCallback, self).__init__(verbose)
+        self.trial = trial
+        self.eval_env = eval_env
+        self.n_eval_episodes = n_eval_episodes
+        self.eval_freq = eval_freq
+        self.best_mean_reward = -float('inf')
+
+    def _on_step(self) -> bool:
+        if self.n_calls % self.eval_freq == 0:
+            mean_reward, _ = evaluate_policy(self.model, self.eval_env, n_eval_episodes=self.n_eval_episodes)
+            self.trial.report(mean_reward, self.n_calls // self.eval_freq)
+            if mean_reward > self.best_mean_reward:
+                self.best_mean_reward = mean_reward
+            if self.trial.should_prune():
+                return False  # Stop the trial by returning False
+        return True
+    
+    
 def log_training_results(algorithm, hyperparameters, mean_reward, std_reward, training_time):
     log_filename = "hyperparameter_log.csv"
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -38,14 +103,34 @@ def log_training_results(algorithm, hyperparameters, mean_reward, std_reward, tr
         writer.writerow([timestamp, algorithm, str(hyperparameters), mean_reward, std_reward, training_time])
 
 def make_env(gym_id, seed):
+    # Create the base environment
     env = gym_super_mario_bros.make(gym_id)
+    
+    # Reduce the action space
     env = JoypadSpace(env, RIGHT_ONLY)
-    env = atari_wrappers.MaxAndSkipEnv(env, 4)
-    env = atari_wrappers.NoopResetEnv(env, noop_max=30)
-    env = atari_wrappers.ClipRewardEnv(env)
+    
+    # Frame skipping and repeating actions
+    env = MaxAndSkipEnv(env, skip=4)
+    
+    # Random no-op resets
+    env = NoopResetEnv(env, noop_max=30)
+    
+    # Reward clipping
+    env = ClipRewardEnv(env)
+    
+    # Converting observation to grayscale and resizing
+    env = GrayScaleObservation(env)
+    env = ResizeObservation(env, shape=84)
+    
+    # Stack frames
+    env = DummyVecEnv([lambda: env])  # Wrap in a DummyVecEnv
+    env = VecFrameStack(env, n_stack=4)
+    
+    # Seeding
     env.seed(seed)  
     env.action_space.seed(seed)
     env.observation_space.seed(seed)
+    
     return env
 
 def objective(trial):
@@ -68,7 +153,14 @@ def objective(trial):
         )
     elif ALGORITHM == "A2C":
         n_steps = trial.suggest_int('n_steps', 5, 256)
-        model = A2C("MlpPolicy", env, verbose=0, gamma=gamma, n_steps=n_steps, learning_rate=learning_rate)
+        model = A2C(
+            "MlpPolicy", 
+            env, 
+            verbose=0, 
+            gamma=gamma, 
+            n_steps=n_steps, 
+            learning_rate=learning_rate
+        )
     elif ALGORITHM == "PPO":
         n_steps = trial.suggest_int('n_steps', 64, 2048, log=True)
         ent_coef = trial.suggest_float('ent_coef', 0.00000001, 0.1, log=True)  # Adjusted for consistency
@@ -108,13 +200,10 @@ def objective(trial):
 if __name__ == "__main__":
     start_time = time.time()
 
-    study = optuna.create_study(direction='maximize')
+    study = optuna.create_study(direction='maximize', pruner=optuna.pruners.MedianPruner(n_warmup_steps=5))
     study.optimize(objective, n_trials=N_TRIALS, show_progress_bar=True)
     
-    print('Number of finished trials:', len(study.trials))
-    print('Best trial:', study.best_trial.params)
-    
     elapsed_time = time.time() - start_time
-    print('\nElapsed time for 1 trial: {:.2f} seconds'.format(elapsed_time))
-    print('Number of finished trials:', len(study.trials))
-    print('Best trial:', study.best_trial.params)
+    print(f'\nElapsed time for {N_TRIALS} trial: {elapsed_time:.2f} seconds')
+    print(f'Number of finished trials: {len(study.trials)}')
+    print(f'Best trial: {study.best_trial.params}')

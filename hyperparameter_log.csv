@@ -2,3 +2,13 @@ Timestamp,Algorithm,Hyperparameters,Mean Reward,Std Reward,Training Time
 2024-04-05 19:15:19,A2C,"{'learning_rate': 6.998964851737534e-05, 'gamma': 0.9779572230426103, 'exploration_final_eps': None, 'n_steps': 198, 'ent_coef': None}",85.8,15.904716281656833,198.1668200492859
 2024-04-05 19:22:38,A2C,"{'learning_rate': 0.006406142437871686, 'gamma': 0.8036815786856756, 'exploration_final_eps': None, 'n_steps': 219, 'ent_coef': None}",-708.2,145.50381438299135,194.0868911743164
 2024-04-05 19:29:57,A2C,"{'learning_rate': 0.0023433272199682546, 'gamma': 0.8737618673653731, 'exploration_final_eps': None, 'n_steps': 205, 'ent_coef': None}",-708.6,147.8683197983936,193.85860180854797
+2024-04-05 20:39:25,A2C,"{'learning_rate': 0.0013311191616644717, 'gamma': 0.8844393693633652, 'exploration_final_eps': None, 'n_steps': 98, 'ent_coef': None}",-769.6,120.58374683181809,180.9333086013794
+2024-04-05 20:51:44,A2C,"{'learning_rate': 0.0038359191180073974, 'gamma': 0.9105718361303934, 'exploration_final_eps': None, 'n_steps': 41, 'ent_coef': None}",-798.0,90.68406695776277,175.87514853477478
+2024-04-05 21:04:21,A2C,"{'learning_rate': 0.003922335505681572, 'gamma': 0.9089123315324088, 'exploration_final_eps': None, 'n_steps': 251, 'ent_coef': None}",-829.1,1.8138357147217055,175.6510226726532
+2024-04-05 21:07:30,A2C,"{'learning_rate': 0.00014962242556481266, 'gamma': 0.9519411642211686, 'exploration_final_eps': None, 'n_steps': 222, 'ent_coef': None}",89.9,11.640017182117903,178.73079586029053
+2024-04-05 21:20:11,A2C,"{'learning_rate': 0.002165284944099979, 'gamma': 0.8499564282548303, 'exploration_final_eps': None, 'n_steps': 54, 'ent_coef': None}",-768.1,120.81593437953455,185.65747475624084
+2024-04-05 21:23:25,A2C,"{'learning_rate': 0.0001272160298466299, 'gamma': 0.9998074583815992, 'exploration_final_eps': None, 'n_steps': 55, 'ent_coef': None}",86.1,15.30653455227538,184.21251440048218
+2024-04-05 21:26:30,A2C,"{'learning_rate': 1.6164013910044465e-05, 'gamma': 0.9506687306762592, 'exploration_final_eps': None, 'n_steps': 154, 'ent_coef': None}",89.5,11.508692367076288,175.36907720565796
+2024-04-05 21:29:43,A2C,"{'learning_rate': 1.0459588671531611e-05, 'gamma': 0.8072310717430731, 'exploration_final_eps': None, 'n_steps': 30, 'ent_coef': None}",138.4,15.576905982896601,178.46688652038574
+2024-04-05 21:43:11,A2C,"{'learning_rate': 0.0003577706135895937, 'gamma': 0.9859163141662926, 'exploration_final_eps': None, 'n_steps': 5, 'ent_coef': None}",-829.8,1.98997487421324,193.00129079818726
+2024-04-05 21:55:25,A2C,"{'learning_rate': 1.5290000753024526e-05, 'gamma': 0.8367903240410419, 'exploration_final_eps': None, 'n_steps': 225, 'ent_coef': None}",-708.4,147.51352480365995,187.3957679271698
