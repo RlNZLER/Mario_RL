@@ -32,7 +32,6 @@ import datetime
 from typing import Callable
 from stable_baselines3 import DQN,A2C,PPO
 from stable_baselines3.common.evaluation import evaluate_policy
-
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT, RIGHT_ONLY
@@ -66,7 +65,7 @@ trainMode = True if sys.argv[1] == 'train' else False
 learningAlg = sys.argv[2] 
 seed = random.randint(0,1000) if trainMode else int(sys.argv[3])
 policyFileName = "policy/"+learningAlg+"-"+environmentID+"-seed"+str(seed)+".policy.pkl"
-num_training_steps = 500_000
+num_training_steps = 50_000
 num_test_episodes = 10
 learning_rate = 0.00083
 gamma = 0.995
