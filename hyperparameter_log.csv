@@ -1,0 +1,4 @@
+Timestamp,Algorithm,Hyperparameters,Mean Reward,Std Reward,Training Time
+2024-04-05 19:15:19,A2C,"{'learning_rate': 6.998964851737534e-05, 'gamma': 0.9779572230426103, 'exploration_final_eps': None, 'n_steps': 198, 'ent_coef': None}",85.8,15.904716281656833,198.1668200492859
+2024-04-05 19:22:38,A2C,"{'learning_rate': 0.006406142437871686, 'gamma': 0.8036815786856756, 'exploration_final_eps': None, 'n_steps': 219, 'ent_coef': None}",-708.2,145.50381438299135,194.0868911743164
+2024-04-05 19:29:57,A2C,"{'learning_rate': 0.0023433272199682546, 'gamma': 0.8737618673653731, 'exploration_final_eps': None, 'n_steps': 205, 'ent_coef': None}",-708.6,147.8683197983936,193.85860180854797
