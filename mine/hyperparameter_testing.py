@@ -14,6 +14,7 @@ import optuna
 import torch
 import numpy as np
 from gym.spaces import Box
+from optuna.visualization import plot_optimization_history, plot_param_importances, plot_slice
 from torchvision import transforms as T
 from stable_baselines3 import DQN, A2C, PPO
 from stable_baselines3.common.evaluation import evaluate_policy
@@ -21,7 +22,6 @@ import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import RIGHT_ONLY
 
-from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.atari_wrappers import MaxAndSkipEnv, NoopResetEnv, ClipRewardEnv
 from stable_baselines3.common.vec_env import VecFrameStack, DummyVecEnv
 
@@ -29,11 +29,10 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # Global settings
 ALGORITHM = "A2C"  # Choose from "DQN", "A2C", "PPO"
-N_TRIALS = 3
+N_TRIALS = 2
 N_TIMESTEPS = int(2e4)
 N_EVAL_EPISODES = 5
 ENV_ID = "SuperMarioBros2-v1"
-EVAL_FREQ = 4000  # Frequency of evaluations within each trial
 
 class GrayScaleObservation(gym.ObservationWrapper):
     def __init__(self, env):
@@ -71,25 +70,6 @@ class ResizeObservation(gym.ObservationWrapper):
         )
         observation = transforms(observation).squeeze(0)
         return observation
-
-class OptunaCallback(BaseCallback):
-    def __init__(self, trial, eval_env, n_eval_episodes=N_EVAL_EPISODES, eval_freq=EVAL_FREQ, verbose=1):
-        super(OptunaCallback, self).__init__(verbose)
-        self.trial = trial
-        self.eval_env = eval_env
-        self.n_eval_episodes = n_eval_episodes
-        self.eval_freq = eval_freq
-        self.best_mean_reward = -float('inf')
-
-    def _on_step(self) -> bool:
-        if self.n_calls % self.eval_freq == 0:
-            mean_reward, _ = evaluate_policy(self.model, self.eval_env, n_eval_episodes=self.n_eval_episodes)
-            self.trial.report(mean_reward, self.n_calls // self.eval_freq)
-            if mean_reward > self.best_mean_reward:
-                self.best_mean_reward = mean_reward
-            if self.trial.should_prune():
-                return False  # Stop the trial by returning False
-        return True
     
     
 def log_training_results(algorithm, hyperparameters, mean_reward, std_reward, training_time):
@@ -136,7 +116,6 @@ def make_env(gym_id, seed):
 def objective(trial):
     learning_rate = trial.suggest_float('learning_rate', 1e-5, 1e-2, log=True)
     gamma = trial.suggest_float('gamma', 0.8, 0.9999)
-
     env = make_env(ENV_ID, random.randint(0, 1000))
     
     if ALGORITHM == "DQN":
@@ -199,11 +178,22 @@ def objective(trial):
 
 if __name__ == "__main__":
     start_time = time.time()
-
     study = optuna.create_study(direction='maximize', pruner=optuna.pruners.MedianPruner(n_warmup_steps=5))
     study.optimize(objective, n_trials=N_TRIALS, show_progress_bar=True)
-    
     elapsed_time = time.time() - start_time
+    
     print(f'\nElapsed time for {N_TRIALS} trial: {elapsed_time:.2f} seconds')
     print(f'Number of finished trials: {len(study.trials)}')
     print(f'Best trial: {study.best_trial.params}')
+    
+    # Plot the optimization history
+    optimization_history = plot_optimization_history(study)
+    optimization_history.show()
+
+    # Plot the importance of hyperparameters
+    param_importances = plot_param_importances(study)
+    param_importances.show()
+
+    # Plot individual hyperparameters or combinations and their effects on the objective
+    slice_plot = plot_slice(study)
+    slice_plot.show()
