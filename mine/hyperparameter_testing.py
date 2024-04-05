@@ -28,7 +28,6 @@ N_TIMESTEPS = int(2e4)
 N_EVAL_EPISODES = 5
 ENV_ID = "SuperMarioBros2-v1"
     
-    
 def log_training_results(algorithm, hyperparameters, mean_reward, std_reward, training_time):
     log_filename = "hyperparameter_log.csv"
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
