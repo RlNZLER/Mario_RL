@@ -11,65 +11,22 @@ import pickle
 import random
 import datetime
 import optuna
-import torch
-import numpy as np
-from gym.spaces import Box
 from optuna.visualization import plot_optimization_history, plot_param_importances, plot_slice
-from torchvision import transforms as T
 from stable_baselines3 import DQN, A2C, PPO
 from stable_baselines3.common.evaluation import evaluate_policy
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import RIGHT_ONLY
-
 from stable_baselines3.common.atari_wrappers import MaxAndSkipEnv, NoopResetEnv, ClipRewardEnv
-from stable_baselines3.common.vec_env import VecFrameStack, DummyVecEnv
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # Global settings
-ALGORITHM = "A2C"  # Choose from "DQN", "A2C", "PPO"
+ALGORITHM = "DQN"  # Choose from "DQN", "A2C", "PPO"
 N_TRIALS = 2
 N_TIMESTEPS = int(2e4)
 N_EVAL_EPISODES = 5
 ENV_ID = "SuperMarioBros2-v1"
-
-class GrayScaleObservation(gym.ObservationWrapper):
-    def __init__(self, env):
-        super().__init__(env)
-        obs_shape = self.observation_space.shape[:2]
-        self.observation_space = Box(low=0, high=255, shape=obs_shape, dtype=np.uint8)
-
-    def permute_orientation(self, observation):
-        # permute [H, W, C] array to [C, H, W] tensor
-        observation = np.transpose(observation, (2, 0, 1))
-        observation = torch.tensor(observation.copy(), dtype=torch.float)
-        return observation
-
-    def observation(self, observation):
-        observation = self.permute_orientation(observation)
-        transform = T.Grayscale()
-        observation = transform(observation)
-        return observation
-
-
-class ResizeObservation(gym.ObservationWrapper):
-    def __init__(self, env, shape):
-        super().__init__(env)
-        if isinstance(shape, int):
-            self.shape = (shape, shape)
-        else:
-            self.shape = tuple(shape)
-
-        obs_shape = self.shape + self.observation_space.shape[2:]
-        self.observation_space = Box(low=0, high=255, shape=obs_shape, dtype=np.uint8)
-
-    def observation(self, observation):
-        transforms = T.Compose(
-            [T.Resize(self.shape, antialias=True), T.Normalize(0, 255)]
-        )
-        observation = transforms(observation).squeeze(0)
-        return observation
     
     
 def log_training_results(algorithm, hyperparameters, mean_reward, std_reward, training_time):
@@ -83,34 +40,14 @@ def log_training_results(algorithm, hyperparameters, mean_reward, std_reward, tr
         writer.writerow([timestamp, algorithm, str(hyperparameters), mean_reward, std_reward, training_time])
 
 def make_env(gym_id, seed):
-    # Create the base environment
     env = gym_super_mario_bros.make(gym_id)
-    
-    # Reduce the action space
     env = JoypadSpace(env, RIGHT_ONLY)
-    
-    # Frame skipping and repeating actions
-    env = MaxAndSkipEnv(env, skip=4)
-    
-    # Random no-op resets
+    env = MaxAndSkipEnv(env, 4)
     env = NoopResetEnv(env, noop_max=30)
-    
-    # Reward clipping
     env = ClipRewardEnv(env)
-    
-    # Converting observation to grayscale and resizing
-    env = GrayScaleObservation(env)
-    env = ResizeObservation(env, shape=84)
-    
-    # Stack frames
-    env = DummyVecEnv([lambda: env])  # Wrap in a DummyVecEnv
-    env = VecFrameStack(env, n_stack=4)
-    
-    # Seeding
-    env.seed(seed)  
+    env.seed(seed)	
     env.action_space.seed(seed)
     env.observation_space.seed(seed)
-    
     return env
 
 def objective(trial):
