@@ -23,3 +23,5 @@ Timestamp,Algorithm,Hyperparameters,Mean Reward,Std Reward,Training Time
 2024-04-05 23:35:48,PPO,"{'learning_rate': 0.0009566347280255133, 'gamma': 0.8735740722924299, 'exploration_final_eps': None, 'n_steps': 341, 'ent_coef': 0.0521264697656166}",-1201.6,1.3564659966250538,197.39260292053223
 2024-04-05 23:53:59,A2C,"{'learning_rate': 0.000979775896977078, 'gamma': 0.9051760042104842, 'exploration_final_eps': None, 'n_steps': 170, 'ent_coef': None}",-769.9,119.708353927368,192.32547879219055
 2024-04-06 00:07:05,A2C,"{'learning_rate': 0.0027903739996360186, 'gamma': 0.9193419186249565, 'exploration_final_eps': None, 'n_steps': 27, 'ent_coef': None}",-800.1,89.71672084957186,188.66430592536926
+2024-04-06 00:44:20,DQN,"{'learning_rate': 0.0001497764318820322, 'gamma': 0.8987022834832782, 'exploration_final_eps': 0.06561336303245417, 'n_steps': None, 'ent_coef': None}",143.8,16.557777628655362,134.9110734462738
+2024-04-06 00:50:59,DQN,"{'learning_rate': 0.0005694940295332115, 'gamma': 0.9617342970152565, 'exploration_final_eps': 0.08652756589287317, 'n_steps': None, 'ent_coef': None}",-829.4,1.9595917942265424,133.54443883895874
