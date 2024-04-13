@@ -37,8 +37,24 @@ from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT, RIGHT_ONLY
 from stable_baselines3.common import atari_wrappers
 
-
-def log_training_results(algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, training_time):
+# Helper functions for logging data
+def log_training_data(algorithm, seed, episode_data):
+    # Define the filename with more precise timestamp
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+    log_filename = f"{algorithm}_{seed}_{timestamp}_data.csv"
+    
+    # Write data to CSV
+    with open(log_filename, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        # Check if the file is empty
+        if file.tell() == 0:
+            # Write header if empty
+            writer.writerow(["Episode", "Steps per Episode", "Reward per Episode"])
+        # Append data
+        for data in episode_data:
+            writer.writerow(data)
+    
+def log_training_results(algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time):
     # log training results to CSV
     log_filename = "training_log.csv"
     
@@ -52,9 +68,9 @@ def log_training_results(algorithm, seed, learning_rate, gamma, num_training_ste
         file.seek(0, 2)
         if file.tell() == 0:
             # If empty, write header
-            writer.writerow(["Timestamp", "Algorithm", "Seed", "Learning Rate","Gamma", "No. of training steps", "Mean Reward", "Std Reward", "Training Time"])
+            writer.writerow(["Timestamp", "Algorithm", "Seed", "Learning Rate","Gamma", "No. of training steps", "Mean Reward", "Std Reward", "Avg Game Score", "Training Time"])
         # Write data to CSV
-        writer.writerow([timestamp, algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, training_time])
+        writer.writerow([timestamp, algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time])
 
 if len(sys.argv)<2 or len(sys.argv)>4:
     print("USAGE: sb-SuperMarioBros2-v1.py (train|test) (DQN|A2C|PPO) [seed_number]")
@@ -65,7 +81,7 @@ trainMode = True if sys.argv[1] == 'train' else False
 learningAlg = sys.argv[2] 
 seed = random.randint(0,1000) if trainMode else int(sys.argv[3])
 policyFileName = "policy/"+learningAlg+"-"+environmentID+"-seed"+str(seed)+".policy.pkl"
-num_training_steps = 500_000
+num_training_steps = 50_000
 num_test_episodes = 10
 learning_rate = 0.0008545550270720303
 gamma = 0.82871784570218
@@ -118,6 +134,8 @@ mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episode
 print("EVALUATION: mean_reward=%s std_reward=%s" % (mean_reward, std_reward))
 
 # visualise the agent's learnt behaviour
+data_batch_size = 1000  # Write to the file every 1000 episodes
+episode_data = [] 
 steps_per_episode = 0
 reward_per_episode = 0
 total_cummulative_reward = 0
@@ -129,19 +147,28 @@ while True and policy_rendering:
     obs, reward, done, info = env.step(action)
     steps_per_episode += 1
     reward_per_episode += reward
+    total_game_score = info[0]['score']
     if any(done):
-        print("episode=%s, steps_per_episode=%s, reward_per_episode=%s" % (episode, steps_per_episode, reward_per_episode))
+        print("episode=%s, steps_per_episode=%s, reward_per_episode=%s, total_game_score=%s" % (episode, steps_per_episode, reward_per_episode, total_game_score))
         total_cummulative_reward += reward_per_episode
+        
+        # Collect data only every 1000th episode
+        if episode % 1000 == 0:
+            episode_data.append((episode, steps_per_episode, reward_per_episode))
+            
         steps_per_episode = 0
         reward_per_episode = 0
         episode += 1
         obs = env.reset()
     env.render("human")
-    if episode > num_test_episodes: 
-        print("total_cummulative_reward=%s avg_cummulative_reward=%s" % \
-              (total_cummulative_reward, total_cummulative_reward/num_test_episodes))
+    if episode >= num_test_episodes: 
+        avg_game_score = total_game_score/num_test_episodes
+        print("total_cummulative_reward=%s avg_cummulative_reward=%s avg_game_score=%s" % \
+              (total_cummulative_reward, total_cummulative_reward/num_test_episodes, avg_game_score))
+        policy_rendering = False
         break
 env.close()
 
 if trainMode:
-    log_training_results(learningAlg, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, training_time)
+    log_training_data(learningAlg, seed, episode_data)
+    log_training_results(learningAlg, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time)
