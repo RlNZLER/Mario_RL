@@ -65,10 +65,10 @@ trainMode = True if sys.argv[1] == 'train' else False
 learningAlg = sys.argv[2] 
 seed = random.randint(0,1000) if trainMode else int(sys.argv[3])
 policyFileName = "policy/"+learningAlg+"-"+environmentID+"-seed"+str(seed)+".policy.pkl"
-num_training_steps = 50_000
+num_training_steps = 500_000
 num_test_episodes = 10
-learning_rate = 0.00083
-gamma = 0.995
+learning_rate = 0.0008545550270720303
+gamma = 0.82871784570218
 policy_rendering = True
 
 # create the learning environment 
