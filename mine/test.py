@@ -28,7 +28,9 @@ import gym
 import time 
 import pickle
 import random
-import datetime 
+import datetime
+import subprocess
+import webbrowser
 from typing import Callable
 from stable_baselines3 import DQN,A2C,PPO
 from stable_baselines3.common.evaluation import evaluate_policy
@@ -37,6 +39,22 @@ from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT, RIGHT_ONLY
 from stable_baselines3.common import atari_wrappers
 
+# Path to the TensorBoard log directory
+tensorboard_log_dir = "tensorboard_log"
+
+# Start TensorBoard as a background process
+tensorboard_process = subprocess.Popen(
+    ['tensorboard', '--logdir', tensorboard_log_dir],
+    stdout=subprocess.PIPE, stderr=subprocess.PIPE
+)
+
+# Optionally, open a web browser automatically pointing to TensorBoard
+webbrowser.open("http://localhost:6006/", new=2)
+
+print("TensorBoard is running. Visit http://localhost:6006/ in your web browser.")
+
+# It's generally a good idea to give TensorBoard a few seconds to start up before the training starts
+time.sleep(5)
 
 def log_training_results(algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time, testing_time):
     # log training results to CSV
@@ -88,11 +106,11 @@ environment = make_env(environmentID, seed)
 # create the agent's model using one of the selected algorithms
 # note: exploration_fraction=0.9 means that it will explore 90% of the training steps
 if learningAlg == "DQN":
-    model = DQN("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, buffer_size=50000, exploration_fraction=0.9, verbose=1)
+    model = DQN("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, buffer_size=50000, exploration_fraction=0.9, verbose=1, tensorboard_log="tensorboard_log/DQN_tensorboard_log")
 elif learningAlg == "A2C":
-    model = A2C("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1)
+    model = A2C("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1, tensorboard_log="tensorboard_log/A2C_tensorboard_log")
 elif learningAlg == "PPO":
-    model = PPO("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1)
+    model = PPO("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1, tensorboard_log="tensorboard_log/PPO_tensorboard_log")
 else:
     print("UNKNOWN learningAlg="+str(learningAlg))
     exit(0)
@@ -117,7 +135,7 @@ print("Evaluating policy...")
 mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episodes=num_test_episodes*5)
 print("EVALUATION: mean_reward=%s std_reward=%s" % (mean_reward, std_reward))
 
-# visualise the agent's learnt behaviour
+# visualise the agent's learnt behaviour.
 data_batch_size = 1000  # Write to the file every 1000 episodes
 steps_per_episode = 0
 reward_per_episode = 0
@@ -140,10 +158,11 @@ while True and policy_rendering:
         episode += 1
         obs = env.reset()
     env.render("human")
-    if episode >= num_test_episodes: 
+    if episode >= num_test_episodes:
+        avg_cummulative_reward = total_cummulative_reward/num_test_episodes
         avg_game_score = total_game_score/num_test_episodes
         print("total_cummulative_reward=%s avg_cummulative_reward=%s avg_game_score=%s" % \
-              (total_cummulative_reward, total_cummulative_reward/num_test_episodes, avg_game_score))
+              (total_cummulative_reward, avg_cummulative_reward, avg_game_score))
         policy_rendering = False
         break
 env.close()
