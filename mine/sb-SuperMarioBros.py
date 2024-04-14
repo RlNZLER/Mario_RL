@@ -123,7 +123,7 @@ steps_per_episode = 0
 reward_per_episode = 0
 total_cummulative_reward = 0
 episode = 1
-start_time = time.time()  # Start measuring training time
+start_time = time.time()  # Start measuring testing time.
 env = model.get_env()
 obs = env.reset()
 while True and policy_rendering:
@@ -147,8 +147,8 @@ while True and policy_rendering:
         policy_rendering = False
         break
 env.close()
-end_time = time.time() # Stop measuring training time
-testing_time = end_time - start_time  # Calculate training time
+end_time = time.time() # Stop measuring testing time.
+testing_time = end_time - start_time  # Calculate training time.
 
 if trainMode:
     log_training_results(learningAlg, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time, testing_time)

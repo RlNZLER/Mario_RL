@@ -22,11 +22,6 @@
 # Contact: hcuayahuitl@lincoln.ac.uk
 #####################################################
 
-# pip install tensorboard
-# tensorboard --logdir=./tensorboard_logs/
-# http://localhost:6006/
-
-
 import csv
 import sys
 import gym
@@ -41,27 +36,9 @@ import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT, RIGHT_ONLY
 from stable_baselines3.common import atari_wrappers
-from stable_baselines3.common.callbacks import TensorboardCallback
 
 
-# Helper functions for logging data
-def log_training_data(algorithm, seed, episode_data):
-    # Define the filename with more precise timestamp
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-    log_filename = f"{algorithm}_{seed}_{timestamp}_data.csv"
-    
-    # Write data to CSV
-    with open(log_filename, mode='a', newline='') as file:
-        writer = csv.writer(file)
-        # Check if the file is empty
-        if file.tell() == 0:
-            # Write header if empty
-            writer.writerow(["Episode", "Steps per Episode", "Reward per Episode"])
-        # Append data
-        for data in episode_data:
-            writer.writerow(data)
-    
-def log_training_results(algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time):
+def log_training_results(algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time, testing_time):
     # log training results to CSV
     log_filename = "training_log.csv"
     
@@ -75,9 +52,9 @@ def log_training_results(algorithm, seed, learning_rate, gamma, num_training_ste
         file.seek(0, 2)
         if file.tell() == 0:
             # If empty, write header
-            writer.writerow(["Timestamp", "Algorithm", "Seed", "Learning Rate","Gamma", "No. of training steps", "Mean Reward", "Std Reward", "Avg Game Score", "Training Time"])
+            writer.writerow(["Timestamp", "Algorithm", "Seed", "Learning Rate","Gamma", "No. of training steps", "Mean Reward", "Std Reward", "Avg Game Score", "Training Time", "Testing Time"])
         # Write data to CSV
-        writer.writerow([timestamp, algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time])
+        writer.writerow([timestamp, algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time, testing_time])
 
 if len(sys.argv)<2 or len(sys.argv)>4:
     print("USAGE: sb-SuperMarioBros2-v1.py (train|test) (DQN|A2C|PPO) [seed_number]")
@@ -111,11 +88,11 @@ environment = make_env(environmentID, seed)
 # create the agent's model using one of the selected algorithms
 # note: exploration_fraction=0.9 means that it will explore 90% of the training steps
 if learningAlg == "DQN":
-    model = DQN("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, buffer_size=50000, exploration_fraction=0.9, verbose=1, tensorboard_log=tensorboard_log_path)
+    model = DQN("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, buffer_size=50000, exploration_fraction=0.9, verbose=1)
 elif learningAlg == "A2C":
-    model = A2C("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1, tensorboard_log=tensorboard_log_path)
+    model = A2C("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1)
 elif learningAlg == "PPO":
-    model = PPO("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1, tensorboard_log=tensorboard_log_path)
+    model = PPO("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1)
 else:
     print("UNKNOWN learningAlg="+str(learningAlg))
     exit(0)
@@ -123,8 +100,8 @@ else:
 # train the agent or load a pre-trained one
 if trainMode:
     start_time = time.time()  # Start measuring training time
-    model.learn(total_timesteps=num_training_steps, callback=TensorboardCallback())
-
+    model.learn(total_timesteps=num_training_steps, progress_bar=True)
+    
     end_time = time.time() # Stop measuring training time
     training_time = end_time - start_time  # Calculate training time
     
@@ -142,11 +119,11 @@ print("EVALUATION: mean_reward=%s std_reward=%s" % (mean_reward, std_reward))
 
 # visualise the agent's learnt behaviour
 data_batch_size = 1000  # Write to the file every 1000 episodes
-episode_data = [] 
 steps_per_episode = 0
 reward_per_episode = 0
 total_cummulative_reward = 0
 episode = 1
+start_time = time.time()  # Start measuring testing time.
 env = model.get_env()
 obs = env.reset()
 while True and policy_rendering:
@@ -158,11 +135,6 @@ while True and policy_rendering:
     if any(done):
         print("episode=%s, steps_per_episode=%s, reward_per_episode=%s, total_game_score=%s" % (episode, steps_per_episode, reward_per_episode, total_game_score))
         total_cummulative_reward += reward_per_episode
-        
-        # Collect data only every 1000th episode
-        if episode % 1000 == 0:
-            episode_data.append((episode, steps_per_episode, reward_per_episode))
-            
         steps_per_episode = 0
         reward_per_episode = 0
         episode += 1
@@ -175,7 +147,8 @@ while True and policy_rendering:
         policy_rendering = False
         break
 env.close()
+end_time = time.time() # Stop measuring testing time.
+testing_time = end_time - start_time  # Calculate training time.
 
 if trainMode:
-    log_training_data(learningAlg, seed, episode_data)
-    log_training_results(learningAlg, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time)
+    log_training_results(learningAlg, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time, testing_time)
