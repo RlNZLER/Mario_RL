@@ -38,7 +38,7 @@ from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT, RIGH
 from stable_baselines3.common import atari_wrappers
 
 
-def log_training_results(algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time):
+def log_training_results(algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time, testing_time):
     # log training results to CSV
     log_filename = "training_log.csv"
     
@@ -52,9 +52,9 @@ def log_training_results(algorithm, seed, learning_rate, gamma, num_training_ste
         file.seek(0, 2)
         if file.tell() == 0:
             # If empty, write header
-            writer.writerow(["Timestamp", "Algorithm", "Seed", "Learning Rate","Gamma", "No. of training steps", "Mean Reward", "Std Reward", "Avg Game Score", "Training Time"])
+            writer.writerow(["Timestamp", "Algorithm", "Seed", "Learning Rate","Gamma", "No. of training steps", "Mean Reward", "Std Reward", "Avg Game Score", "Training Time", "Testing Time"])
         # Write data to CSV
-        writer.writerow([timestamp, algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time])
+        writer.writerow([timestamp, algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time, testing_time])
 
 if len(sys.argv)<2 or len(sys.argv)>4:
     print("USAGE: sb-SuperMarioBros2-v1.py (train|test) (DQN|A2C|PPO) [seed_number]")
@@ -123,6 +123,7 @@ steps_per_episode = 0
 reward_per_episode = 0
 total_cummulative_reward = 0
 episode = 1
+start_time = time.time()  # Start measuring training time
 env = model.get_env()
 obs = env.reset()
 while True and policy_rendering:
@@ -146,6 +147,8 @@ while True and policy_rendering:
         policy_rendering = False
         break
 env.close()
+end_time = time.time() # Stop measuring training time
+testing_time = end_time - start_time  # Calculate training time
 
 if trainMode:
-    log_training_results(learningAlg, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time)
+    log_training_results(learningAlg, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time, testing_time)
