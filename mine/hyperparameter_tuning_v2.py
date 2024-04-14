@@ -1,5 +1,5 @@
 ################################################################
-# Hyperparameter tuning for sb-SuperMarioBros.py version 1
+# Hyperparameter tuning for sb-SuperMarioBros.py version 2
 ################################################################
 
 import warnings
@@ -91,48 +91,67 @@ def make_env(gym_id, seed):
 
 
 def objective(trial):
+    # Common hyperparameters
     learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-2, log=True)
     gamma = trial.suggest_float("gamma", 0.8, 0.9999)
     env = make_env(ENV_ID, random.randint(0, 1000))
 
     if ALGORITHM == "DQN":
+        buffer_size = trial.suggest_int("buffer_size", 10000, 100000)
+        batch_size = trial.suggest_int("batch_size", 32, 256)
+        train_freq = trial.suggest_int("train_freq", 1, 100)
+        target_update_interval = trial.suggest_int("target_update_interval", 100, 5000)
+        exploration_fraction = trial.suggest_float("exploration_fraction", 0.1, 0.5)
         exploration_final_eps = trial.suggest_float("exploration_final_eps", 0.01, 0.1)
-        BUFFER_SIZE = 10000
+
         model = DQN(
-            "MlpPolicy",
+            "CnnPolicy", 
             env,
             verbose=0,
-            gamma=gamma,
             learning_rate=learning_rate,
+            buffer_size=buffer_size,
+            learning_starts=1000,
+            batch_size=batch_size,
+            gamma=gamma,
+            train_freq=train_freq,
+            target_update_interval=target_update_interval,
+            exploration_fraction=exploration_fraction,
             exploration_final_eps=exploration_final_eps,
-            buffer_size=BUFFER_SIZE,
+            tensorboard_log=None
         )
     elif ALGORITHM == "A2C":
         n_steps = trial.suggest_int("n_steps", 5, 256)
+        vf_coef = trial.suggest_float("vf_coef", 0.1, 1.0)
+        ent_coef = trial.suggest_float("ent_coef", 0.0001, 0.1)
+
         model = A2C(
-            "MlpPolicy",
+            "CnnPolicy", 
             env,
             verbose=0,
-            gamma=gamma,
-            n_steps=n_steps,
             learning_rate=learning_rate,
+            n_steps=n_steps,
+            gamma=gamma,
+            vf_coef=vf_coef,
+            ent_coef=ent_coef,
+            tensorboard_log=None
         )
     elif ALGORITHM == "PPO":
         n_steps = trial.suggest_int("n_steps", 64, 2048, log=True)
-        ent_coef = trial.suggest_float(
-            "ent_coef", 0.00000001, 0.1, log=True
-        )  # Adjusted for consistency
-        # batch_size = trial.suggest_int('batch_size', 8, 256)
+        ent_coef = trial.suggest_float("ent_coef", 0.0001, 0.1, log=True)
+        n_epochs = trial.suggest_int("n_epochs", 1, 10)
         batch_size = calculate_batch_size(n_steps)
+
         model = PPO(
-            "MlpPolicy",
+            "CnnPolicy",
             env,
             verbose=0,
-            gamma=gamma,
             learning_rate=learning_rate,
             n_steps=n_steps,
-            batch_size=batch_size,  # Use if optimizing
+            gamma=gamma,
             ent_coef=ent_coef,
+            n_epochs=n_epochs,
+            batch_size=batch_size,
+            tensorboard_log=None
         )
     else:
         raise ValueError("Unsupported algorithm specified.")
@@ -141,55 +160,29 @@ def objective(trial):
     model.learn(total_timesteps=N_TIMESTEPS)
     training_time = time.time() - start_time
 
-    mean_reward, std_reward = evaluate_policy(
-        model, model.get_env(), n_eval_episodes=N_EVAL_EPISODES
-    )
+    mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episodes=N_EVAL_EPISODES)
 
     hyperparameters = {
         "learning_rate": learning_rate,
         "gamma": gamma,
+        # Specific to DQN
         "exploration_final_eps": exploration_final_eps if ALGORITHM == "DQN" else None,
+        # Specific to A2C and PPO
         "n_steps": n_steps if ALGORITHM in ["A2C", "PPO"] else None,
+        # Specific to PPO
         "ent_coef": ent_coef if ALGORITHM == "PPO" else None,
     }
-    log_training_results(
-        ALGORITHM, hyperparameters, mean_reward, std_reward, training_time
-    )
+    log_training_results(ALGORITHM, hyperparameters, mean_reward, std_reward, training_time)
 
     env.close()
 
     return mean_reward
 
 
+
 if __name__ == "__main__":
     start_time = time.time()
-    study = optuna.create_study(
-        direction="maximize", pruner=optuna.pruners.MedianPruner(n_warmup_steps=5)
-    )
-
-    # Best performing parameters for each algorithm
-    best_params = {
-        "A2C": {
-            "learning_rate": 2.2420029200823555e-05,
-            "gamma": 0.8716841599776166,
-            "n_steps": 95,
-        },
-        "DQN": {
-            "learning_rate": 1.9729843536950783e-05,
-            "gamma": 0.8132156146401613,
-            "exploration_final_eps": 0.09526606425693193,
-        },
-        "PPO": {
-            "learning_rate": 1.0049016265515837e-05,
-            "gamma": 0.8650954852708294,
-            "n_steps": 497,
-            "ent_coef": 0.04336278885244821,
-        },
-    }
-
-    # Seed the study with known good hyperparameters for the selected algorithm
-    if ALGORITHM in best_params:
-        study.enqueue_trial(best_params[ALGORITHM])
+    study = optuna.create_study(direction="maximize", pruner=optuna.pruners.MedianPruner(n_warmup_steps=5))
 
     study.optimize(objective, n_trials=N_TRIALS, show_progress_bar=True)
     elapsed_time = time.time() - start_time

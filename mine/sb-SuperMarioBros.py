@@ -37,23 +37,7 @@ from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT, RIGHT_ONLY
 from stable_baselines3.common import atari_wrappers
 
-# Helper functions for logging data
-def log_training_data(algorithm, seed, episode_data):
-    # Define the filename with more precise timestamp
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
-    log_filename = f"{algorithm}_{seed}_{timestamp}_data.csv"
-    
-    # Write data to CSV
-    with open(log_filename, mode='a', newline='') as file:
-        writer = csv.writer(file)
-        # Check if the file is empty
-        if file.tell() == 0:
-            # Write header if empty
-            writer.writerow(["Episode", "Steps per Episode", "Reward per Episode"])
-        # Append data
-        for data in episode_data:
-            writer.writerow(data)
-    
+
 def log_training_results(algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time):
     # log training results to CSV
     log_filename = "training_log.csv"
@@ -135,7 +119,6 @@ print("EVALUATION: mean_reward=%s std_reward=%s" % (mean_reward, std_reward))
 
 # visualise the agent's learnt behaviour
 data_batch_size = 1000  # Write to the file every 1000 episodes
-episode_data = [] 
 steps_per_episode = 0
 reward_per_episode = 0
 total_cummulative_reward = 0
@@ -151,11 +134,6 @@ while True and policy_rendering:
     if any(done):
         print("episode=%s, steps_per_episode=%s, reward_per_episode=%s, total_game_score=%s" % (episode, steps_per_episode, reward_per_episode, total_game_score))
         total_cummulative_reward += reward_per_episode
-        
-        # Collect data only every 1000th episode
-        if episode % 1000 == 0:
-            episode_data.append((episode, steps_per_episode, reward_per_episode))
-            
         steps_per_episode = 0
         reward_per_episode = 0
         episode += 1
@@ -170,5 +148,4 @@ while True and policy_rendering:
 env.close()
 
 if trainMode:
-    log_training_data(learningAlg, seed, episode_data)
     log_training_results(learningAlg, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time)
