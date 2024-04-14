@@ -4,13 +4,11 @@
 
 import warnings
 import csv
-import sys
-import gym
 import time
-import pickle
+import torch 
+import optuna
 import random
 import datetime
-import optuna
 from optuna.visualization import (
     plot_optimization_history,
     plot_param_importances,
@@ -30,7 +28,7 @@ from stable_baselines3.common.atari_wrappers import (
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # Global settings
-ALGORITHM = "PPO"  # Choose from "DQN", "A2C", "PPO"
+ALGORITHM = "DQN"  # Choose from "DQN", "A2C", "PPO"
 N_TRIALS = 50
 N_TIMESTEPS = int(2e4)
 N_EVAL_EPISODES = 5
@@ -91,93 +89,106 @@ def make_env(gym_id, seed):
 
 
 def objective(trial):
-    # Common hyperparameters
-    learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-2, log=True)
-    gamma = trial.suggest_float("gamma", 0.8, 0.9999)
-    env = make_env(ENV_ID, random.randint(0, 1000))
-
-    if ALGORITHM == "DQN":
-        buffer_size = trial.suggest_int("buffer_size", 10000, 100000)
-        batch_size = trial.suggest_int("batch_size", 32, 256)
-        train_freq = trial.suggest_int("train_freq", 1, 100)
-        target_update_interval = trial.suggest_int("target_update_interval", 100, 5000)
-        exploration_fraction = trial.suggest_float("exploration_fraction", 0.1, 0.5)
-        exploration_final_eps = trial.suggest_float("exploration_final_eps", 0.01, 0.1)
-
-        model = DQN(
-            "CnnPolicy", 
-            env,
-            verbose=0,
-            learning_rate=learning_rate,
-            buffer_size=buffer_size,
-            learning_starts=1000,
-            batch_size=batch_size,
-            gamma=gamma,
-            train_freq=train_freq,
-            target_update_interval=target_update_interval,
-            exploration_fraction=exploration_fraction,
-            exploration_final_eps=exploration_final_eps,
-            tensorboard_log=None
-        )
-    elif ALGORITHM == "A2C":
-        n_steps = trial.suggest_int("n_steps", 5, 256)
-        vf_coef = trial.suggest_float("vf_coef", 0.1, 1.0)
-        ent_coef = trial.suggest_float("ent_coef", 0.0001, 0.1)
-
-        model = A2C(
-            "CnnPolicy", 
-            env,
-            verbose=0,
-            learning_rate=learning_rate,
-            n_steps=n_steps,
-            gamma=gamma,
-            vf_coef=vf_coef,
-            ent_coef=ent_coef,
-            tensorboard_log=None
-        )
-    elif ALGORITHM == "PPO":
-        n_steps = trial.suggest_int("n_steps", 64, 2048, log=True)
-        ent_coef = trial.suggest_float("ent_coef", 0.0001, 0.1, log=True)
-        n_epochs = trial.suggest_int("n_epochs", 1, 10)
-        batch_size = calculate_batch_size(n_steps)
-
-        model = PPO(
-            "CnnPolicy",
-            env,
-            verbose=0,
-            learning_rate=learning_rate,
-            n_steps=n_steps,
-            gamma=gamma,
-            ent_coef=ent_coef,
-            n_epochs=n_epochs,
-            batch_size=batch_size,
-            tensorboard_log=None
-        )
-    else:
-        raise ValueError("Unsupported algorithm specified.")
-
-    start_time = time.time()
-    model.learn(total_timesteps=N_TIMESTEPS)
-    training_time = time.time() - start_time
-
-    mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episodes=N_EVAL_EPISODES)
-
+    # Define the dictionary for all hyperparameters
     hyperparameters = {
-        "learning_rate": learning_rate,
-        "gamma": gamma,
-        # Specific to DQN
-        "exploration_final_eps": exploration_final_eps if ALGORITHM == "DQN" else None,
-        # Specific to A2C and PPO
-        "n_steps": n_steps if ALGORITHM in ["A2C", "PPO"] else None,
-        # Specific to PPO
-        "ent_coef": ent_coef if ALGORITHM == "PPO" else None,
+        "learning_rate": trial.suggest_float("learning_rate", 1e-5, 1e-2, log=True),
+        "gamma": trial.suggest_float("gamma", 0.8, 0.9999),
+        "buffer_size": None,
+        "batch_size": None,
+        "train_freq": None,
+        "target_update_interval": None,
+        "exploration_fraction": None,
+        "exploration_final_eps": None,
+        "n_steps": None,
+        "vf_coef": None,
+        "ent_coef": None,
+        "n_epochs": None
     }
+    
+    env = make_env(ENV_ID, random.randint(0, 1000))
+    
+    try:
+        if ALGORITHM == "DQN":
+            hyperparameters.update({
+                "buffer_size": trial.suggest_int("buffer_size", 10000, 100000),
+                "batch_size": trial.suggest_int("batch_size", 32, 256),
+                "train_freq": trial.suggest_int("train_freq", 1, 100),
+                "target_update_interval": trial.suggest_int("target_update_interval", 100, 5000),
+                "exploration_fraction": trial.suggest_float("exploration_fraction", 0.1, 0.5),
+                "exploration_final_eps": trial.suggest_float("exploration_final_eps", 0.01, 0.1)
+            })
+
+            model = DQN(
+                "CnnPolicy", 
+                env,
+                verbose=0,
+                learning_rate=hyperparameters["learning_rate"],
+                buffer_size=hyperparameters["buffer_size"],
+                learning_starts=1000,
+                batch_size=hyperparameters["batch_size"],
+                gamma=hyperparameters["gamma"],
+                train_freq=hyperparameters["train_freq"],
+                target_update_interval=hyperparameters["target_update_interval"],
+                exploration_fraction=hyperparameters["exploration_fraction"],
+                exploration_final_eps=hyperparameters["exploration_final_eps"],
+                tensorboard_log=None
+            )
+        elif ALGORITHM == "A2C":
+            hyperparameters.update({
+                "n_steps": trial.suggest_int("n_steps", 5, 256),
+                "vf_coef": trial.suggest_float("vf_coef", 0.1, 1.0),
+                "ent_coef": trial.suggest_float("ent_coef", 0.0001, 0.1)
+            })
+
+            model = A2C(
+                "CnnPolicy", 
+                env,
+                verbose=0,
+                learning_rate=hyperparameters["learning_rate"],
+                n_steps=hyperparameters["n_steps"],
+                gamma=hyperparameters["gamma"],
+                vf_coef=hyperparameters["vf_coef"],
+                ent_coef=hyperparameters["ent_coef"],
+                tensorboard_log=None
+            )
+        elif ALGORITHM == "PPO":
+            hyperparameters.update({
+                "n_steps": trial.suggest_int("n_steps", 64, 2048, log=True),
+                "ent_coef": trial.suggest_float("ent_coef", 0.0001, 0.1, log=True),
+                "n_epochs": trial.suggest_int("n_epochs", 1, 10),
+            })
+            hyperparameters["batch_size"] = calculate_batch_size(hyperparameters["n_steps"])
+
+            model = PPO(
+                "CnnPolicy",
+                env,
+                verbose=0,
+                learning_rate=hyperparameters["learning_rate"],
+                n_steps=hyperparameters["n_steps"],
+                gamma=hyperparameters["gamma"],
+                ent_coef=hyperparameters["ent_coef"],
+                n_epochs=hyperparameters["n_epochs"],
+                batch_size=hyperparameters["batch_size"],
+                tensorboard_log=None
+            )
+        else:
+            raise ValueError("Unsupported algorithm specified.")
+
+        start_time = time.time()
+        model.learn(total_timesteps=N_TIMESTEPS)
+        training_time = time.time() - start_time
+
+        mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episodes=N_EVAL_EPISODES)
+    finally:
+        # This block ensures that the GPU memory is cleaned up whatever happens in the try block
+        env.close()
+        model = None  # Dereference the model
+        torch.cuda.empty_cache()  # Clear PyTorch GPU memory cache
+            
+    # Log the training results including all hyperparameters
     log_training_results(ALGORITHM, hyperparameters, mean_reward, std_reward, training_time)
 
-    env.close()
-
     return mean_reward
-
 
 
 if __name__ == "__main__":
