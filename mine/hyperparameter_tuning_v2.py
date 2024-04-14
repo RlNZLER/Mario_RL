@@ -38,7 +38,7 @@ ENV_ID = "SuperMarioBros2-v1"
 def log_training_results(
     algorithm, hyperparameters, mean_reward, std_reward, training_time
 ):
-    log_filename = "hyperparameter_log.csv"
+    log_filename = "hyperparameter_log_v2.csv"
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(log_filename, mode="a", newline="") as file:
         writer = csv.writer(file)
