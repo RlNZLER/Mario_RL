@@ -1,5 +1,5 @@
 ################################################################
-# Hyperparameter tuning for sb-SuperMarioBros.py version 3
+# Hyperparameter tuning for sb-SuperMarioBros.py version 4
 ################################################################
 
 import warnings
