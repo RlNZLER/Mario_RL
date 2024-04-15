@@ -32,11 +32,11 @@ from stable_baselines3.common.atari_wrappers import (
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # Global settings
-N_TRIALS = 1
+N_TRIALS = 2
 N_TIMESTEPS = int(2e4)
 N_EVAL_EPISODES = 5
 ENV_ID = "SuperMarioBros2-v1"
-ALGORITHMS = ["PPO", "DQN", "A2C"]  # Algorithms to test
+ALGORITHMS = ["DQN", "PPO", "A2C"]  # Algorithms to test
 TENSORBOARD_BASE_DIR = "./tensorboard_hyperparameter_logs/"  # Base directory for TensorBoard logs
 
 
@@ -44,7 +44,7 @@ def cleanup_process():
     tensorboard_process.kill()
     
 def log_training_results(algorithm, seed, hyperparameters, mean_reward, std_reward, training_time):
-    log_filename = "tensorboard_hyperparameter_logs/hyperparameter_log_v3.csv"
+    log_filename = "tensorboard_hyperparameter_logs/hyperparameter_log_v4.csv"
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(log_filename, mode="a", newline="") as file:
         writer = csv.writer(file)
