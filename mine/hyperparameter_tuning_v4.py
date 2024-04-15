@@ -32,11 +32,11 @@ from stable_baselines3.common.atari_wrappers import (
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # Global settings
-N_TRIALS = 50
+N_TRIALS = 1
 N_TIMESTEPS = int(2e4)
 N_EVAL_EPISODES = 5
 ENV_ID = "SuperMarioBros2-v1"
-ALGORITHMS = ["DQN", "A2C", "PPO"]  # Algorithms to test
+ALGORITHMS = ["PPO", "DQN", "A2C"]  # Algorithms to test
 TENSORBOARD_BASE_DIR = "./tensorboard_hyperparameter_logs/"  # Base directory for TensorBoard logs
 
 
@@ -71,21 +71,21 @@ def log_training_results(algorithm, seed, hyperparameters, mean_reward, std_rewa
 
 def save_optimization_history(study, filename="./plots/optimization_history.png"):
     fig = plot_optimization_history(study)
-    fig.savefig(filename)
+    fig.write_image(filename)
     fig.show()
-    fig.close()
+    del fig
     
 def save_param_importances(study, filename="./plots/param_importances.png"):
     fig = plot_param_importances(study)
-    fig.savefig(filename)
+    fig.write_image(filename)
     fig.show()
-    fig.close()
+    del fig
     
 def save_slice_plot(study, filename="./plots/slice_plot.png"):
     fig = plot_slice(study)
-    fig.savefig(filename)
+    fig.write_image(filename)
     fig.show()
-    fig.close()
+    del fig
     
 def calculate_batch_size(n_steps, min_batch_size=8, max_batch_size=256):
     total_steps = n_steps
@@ -183,8 +183,8 @@ def objective(trial, algorithm):
         )
     elif algorithm == "PPO":
         hyperparameters.update({
-            "n_steps": trial.suggest_int("n_steps", 64, 2048, log=True),
-            "ent_coef": trial.suggest_float("ent_coef", 0.0001, 0.1, log=True),
+            "n_steps": trial.suggest_int("n_steps", 64, 2048),
+            "ent_coef": trial.suggest_float("ent_coef", 0.0001, 0.1),
             "n_epochs": trial.suggest_int("n_epochs", 1, 10),
         })
         hyperparameters["batch_size"] = calculate_batch_size(hyperparameters["n_steps"])
@@ -239,11 +239,19 @@ if __name__ == "__main__":
     print("TensorBoard is running. Visit http://localhost:6006/ in your web browser.")
     time.sleep(5)
     
+    # Define the SQLite URL to save the study
+    sqlite_url = "sqlite:///hyperparameter_study.db"
+
+    
     overall_best_reward = -float('inf')
     best_algorithm = None
 
     for algorithm in ALGORITHMS:
-        study = optuna.create_study(direction="maximize", pruner=optuna.pruners.MedianPruner(n_warmup_steps=5))
+        # Create or load a study
+        study = optuna.create_study(study_name="Hyperparameter_Optimization_SB3",
+                                    direction="maximize",
+                                    storage=sqlite_url,
+                                    load_if_exists=True)
         study.optimize(lambda trial: objective(trial, algorithm), n_trials=N_TRIALS, show_progress_bar=True)
 
         # Output results
