@@ -140,7 +140,7 @@ def objective(trial, algorithm):
     # Create and return model based on the algorithm
     if algorithm == "DQN":
         hyperparameters.update({
-            "buffer_size": trial.suggest_int("buffer_size", 10000, 50000),
+            "buffer_size": trial.suggest_int("buffer_size", 5000, 10000),
             "batch_size": trial.suggest_int("batch_size", 32, 256),
             "train_freq": trial.suggest_int("train_freq", 1, 100),
             "target_update_interval": trial.suggest_int("target_update_interval", 100, 5000),
