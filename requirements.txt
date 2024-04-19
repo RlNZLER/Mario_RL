@@ -110,9 +110,9 @@ tenacity==8.2.3
 tensorboard==2.16.2
 tensorboard-data-server==0.7.2
 threadpoolctl==3.4.0
-torch==2.0.1+cu117
-torchaudio==2.0.2+cu117
-torchvision==0.15.2+cu117
+torch==2.0.1+cu117 -f https://download.pytorch.org/whl/cu117/torch-2.0.1%2Bcu117-cp38-cp38-linux_x86_64.whl
+torchvision==0.15.2+cu117 -f https://download.pytorch.org/whl/cu117/torchvision-0.15.2%2Bcu117-cp38-cp38-linux_x86_64.whl
+torchaudio==2.0.2+cu117 -f https://download.pytorch.org/whl/cu117/torchaudio-2.0.2%2Bcu117-cp38-cp38-linux_x86_64.whl
 tornado==6.4
 tqdm==4.66.2
 traitlets==5.14.2
