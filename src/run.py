@@ -25,9 +25,9 @@ class SuperMarioGUI:
         self.mode_label.grid(row=0, column=0, padx=10, pady=5, sticky='w')
 
         self.mode_var = tk.StringVar()
-        self.train_radio = ttk.Radiobutton(master, text="Train", variable=self.mode_var, value="Train", command=self.toggle_seed_input)
+        self.train_radio = ttk.Radiobutton(master, text="Train", variable=self.mode_var, value="Train", command=self.enable_seed_input)
         self.train_radio.grid(row=0, column=1, padx=10, pady=5)
-        self.test_radio = ttk.Radiobutton(master, text="Test", variable=self.mode_var, value="Test", command=self.toggle_seed_input)
+        self.test_radio = ttk.Radiobutton(master, text="Test", variable=self.mode_var, value="Test", command=self.enable_seed_input)
         self.test_radio.grid(row=0, column=2, padx=10, pady=5)
 
         self.algorithm_label = ttk.Label(master, text="Select Algorithm:")
@@ -43,37 +43,29 @@ class SuperMarioGUI:
 
         self.seed_label = ttk.Label(master, text="Seed:")
         self.seed_label.grid(row=2, column=0, padx=10, pady=5, sticky='w')
-        self.seed_input = ttk.Entry(master, state='disabled')
+        self.seed_input = ttk.Entry(master)
         self.seed_input.grid(row=2, column=1, columnspan=3, padx=10, pady=5, sticky='we')
 
         self.submit_button = ttk.Button(master, text="Submit", command=self.submit)
         self.submit_button.grid(row=3, columnspan=4, padx=10, pady=10)
 
-    def toggle_seed_input(self):
-        if self.mode_var.get() == "Test":
-            self.seed_input['state'] = 'normal'
-        else:
-            self.seed_input['state'] = 'disabled'
+    def enable_seed_input(self):
+        self.seed_input['state'] = 'normal'  # Enable seed input for both Train and Test modes
 
     def submit(self):
         mode = self.mode_var.get().lower()
         algorithm = self.algorithm_var.get().upper()
-        if mode == "test":
-            seed = self.seed_input.get()  # Get seed from input
-            if not seed.isdigit():  # Simple validation to ensure seed is a number
-                print("Seed must be a number.")
-                return
-        else:
-            seed = 123  # Default seed for training or other modes
+        seed = self.seed_input.get()  # Always use seed from input
+        if not seed.isdigit():  # Simple validation to ensure seed is a number
+            print("Seed must be a number.")
+            return
         self.master.destroy()
-        if mode == "train":
-            sys.argv = [sys.argv[0], "train", algorithm]
-        elif mode == "test":
-            sys.argv = [sys.argv[0], "test", algorithm, seed]
+        if mode in ["train", "test"]:
+            sys.argv = [sys.argv[0], mode, algorithm, seed]
         else:
             print("Invalid mode selected.")
             return
-        exec(open("mine/sb-SuperMarioBros.py").read())
+        exec(open("src/sb-SuperMarioBros.py").read())  # Adjust path as needed
 
 def main():
     root = tk.Tk()

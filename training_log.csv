@@ -1,0 +1,2 @@
+Timestamp,Algorithm,Seed,Learning Rate,Gamma,No. of training steps,Mean Reward,Std Reward,Avg Game Score,Training Time,Testing Time
+2024-04-19 03:02:16,A2C,942,0.0008545550270720303,0.82871784570218,100000,322.28,36.63224808826234,0.0,1278.9493596553802,31.063859462738037

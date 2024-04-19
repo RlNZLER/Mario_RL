@@ -74,16 +74,17 @@ def log_training_results(algorithm, seed, learning_rate, gamma, num_training_ste
         # Write data to CSV
         writer.writerow([timestamp, algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time, testing_time])
 
-if len(sys.argv)<2 or len(sys.argv)>4:
+if len(sys.argv) not in [3, 4]:
     print("USAGE: sb-SuperMarioBros2-v1.py (train|test) (DQN|A2C|PPO) [seed_number]")
     exit(0)
 
 environmentID = "SuperMarioBros2-v1"
 trainMode = True if sys.argv[1] == 'train' else False
 learningAlg = sys.argv[2] 
-seed = random.randint(0,1000) if trainMode else int(sys.argv[3])
+# seed = random.randint(0,1000) if trainMode else int(sys.argv[3])
+seed = int(sys.argv[3])
 policyFileName = "policy/"+learningAlg+"-"+environmentID+"-seed"+str(seed)+".policy.pkl"
-num_training_steps = 50_000
+num_training_steps = 100_000
 num_test_episodes = 10
 learning_rate = 0.0008545550270720303
 gamma = 0.82871784570218
