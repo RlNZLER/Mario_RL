@@ -22,7 +22,6 @@
 # Contact: hcuayahuitl@lincoln.ac.uk
 #####################################################
 
-import os
 import csv
 import sys
 import gym
@@ -42,8 +41,6 @@ from stable_baselines3.common import atari_wrappers
 
 # Path to the TensorBoard log directory
 tensorboard_log_dir = "tensorboard_log"
-if not os.path.exists(tensorboard_log_dir):
-    os.makedirs(tensorboard_log_dir)
     
 # Start TensorBoard as a background process
 tensorboard_process = subprocess.Popen(
