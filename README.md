@@ -15,6 +15,26 @@ In this assignment, you are free to train any DRL agent, in any programming lang
 
 Please read the Criterion Reference Grid for details on how your work will be graded.
 
+### Installation
+#### Step 1: Create a python virtual environment.
+```
+python3 -m venv mario_env
+```
+and then activate the environment using:
+```
+source mario_env/bin/activate
+```
+
+#### Step 2: Install pytorch.
+```
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117
+```
+
+#### Step 3: Install remaining libraries.
+```
+pip install -r requirements.txt
+```
+
 Steps:
 1. python3 -m venv env
 2. source env/bin/activate
