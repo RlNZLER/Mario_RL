@@ -88,7 +88,7 @@ if not os.path.exists("policy"):
     os.makedirs("policy")
 policyFileName = "policy/"+learningAlg+"-"+environmentID+"-seed"+str(seed)+".policy.pkl"
 num_training_steps = 100_000
-num_test_episodes = 10
+num_test_episodes = 20
 learning_rate = 0.0008545550270720303
 gamma = 0.82871784570218
 policy_rendering = True
@@ -136,7 +136,7 @@ else:
     model.policy = policy
 
 print("Evaluating policy...")
-mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episodes=num_test_episodes*5)
+mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episodes=50)
 print("EVALUATION: mean_reward=%s std_reward=%s" % (mean_reward, std_reward))
 
 # visualise the agent's learnt behaviour.
