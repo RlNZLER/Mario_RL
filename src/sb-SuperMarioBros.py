@@ -92,8 +92,6 @@ if not os.path.exists("policy"):
 policyFileName = "policy/"+learningAlg+"-"+environmentID+"-seed"+str(seed)+".policy.pkl"
 num_training_steps = 100_000
 num_test_episodes = 20
-learning_rate = 0.0008545550270720303
-gamma = 0.82871784570218
 policy_rendering = True
 
 # create the learning environment 
@@ -113,11 +111,17 @@ environment = make_env(environmentID, seed)
 # create the agent's model using one of the selected algorithms
 # note: exploration_fraction=0.9 means that it will explore 90% of the training steps
 if learningAlg == "DQN":
-    model = DQN("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, buffer_size=50000, exploration_fraction=0.9, verbose=1, tensorboard_log="tensorboard_log/DQN_tensorboard_log")
+    learning_rate=0.00274725624042349
+    gamma=0.904697625355928
+    model = DQN("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, buffer_size=10000, batch_size=46, exploration_fraction=0.4071996216115, exploration_final_eps=0.0522320894370654, verbose=1, tensorboard_log="tensorboard_log/DQN_tensorboard_log")
 elif learningAlg == "A2C":
-    model = A2C("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1, tensorboard_log="tensorboard_log/A2C_tensorboard_log")
+    learning_rate=0.00248345618648342
+    gamma=0.855424134003397
+    model = A2C("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, vf_coef=0.486741019618398, ent_coef=0.0247134804959192, verbose=1, tensorboard_log="tensorboard_log/A2C_tensorboard_log")
 elif learningAlg == "PPO":
-    model = PPO("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, verbose=1, tensorboard_log="tensorboard_log/PPO_tensorboard_log")
+    learning_rate=0.0000270874382318458
+    gamma=0.930044843085905
+    model = PPO("CnnPolicy", environment, seed=seed, learning_rate=learning_rate, gamma=gamma, ent_coef=0.0673625262803434, verbose=1, tensorboard_log="tensorboard_log/PPO_tensorboard_log")
 else:
     print("UNKNOWN learningAlg="+str(learningAlg))
     exit(0)
