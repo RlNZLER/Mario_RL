@@ -40,6 +40,12 @@ from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import RIGHT_ONLY
 from stable_baselines3.common import atari_wrappers
 
+
+if len(sys.argv) not in [3, 4]:
+    print("USAGE: sb-SuperMarioBros2-v1.py (train|test) (DQN|A2C|PPO) [seed_number]")
+    exit(0)
+    
+    
 # Path to the TensorBoard log directory
 tensorboard_log_dir = "tensorboard_log"
     
@@ -75,9 +81,6 @@ def log_training_results(algorithm, seed, learning_rate, gamma, num_training_ste
         # Write data to CSV
         writer.writerow([timestamp, algorithm, seed, learning_rate, gamma, num_training_steps, mean_reward, std_reward, avg_game_score, training_time, testing_time])
 
-if len(sys.argv) not in [3, 4]:
-    print("USAGE: sb-SuperMarioBros2-v1.py (train|test) (DQN|A2C|PPO) [seed_number]")
-    exit(0)
 
 environmentID = "SuperMarioBros2-v1"
 trainMode = True if sys.argv[1] == 'train' else False
