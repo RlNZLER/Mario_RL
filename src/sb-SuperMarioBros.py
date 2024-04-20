@@ -22,6 +22,7 @@
 # Contact: hcuayahuitl@lincoln.ac.uk
 #####################################################
 
+import os
 import csv
 import sys
 import gym
@@ -83,6 +84,8 @@ trainMode = True if sys.argv[1] == 'train' else False
 learningAlg = sys.argv[2] 
 # seed = random.randint(0,1000) if trainMode else int(sys.argv[3])
 seed = int(sys.argv[3])
+if not os.path.exists("policy"):
+    os.makedirs("policy")
 policyFileName = "policy/"+learningAlg+"-"+environmentID+"-seed"+str(seed)+".policy.pkl"
 num_training_steps = 100_000
 num_test_episodes = 10
