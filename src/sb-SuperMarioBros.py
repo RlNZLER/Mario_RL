@@ -2,7 +2,7 @@
 # sb-SuperMarioBros.py
 #
 # This program trains deep reinforcement learning agents to solve the decision-making
-# problem of the the so-called LunarLander-v2. See details in the following link: 
+# problem of the the so-called SuperMarioBros. See details in the following link: 
 # https://www.gymlibrary.dev/environments/box2d/lunar_lander/
 #
 # Although the dependencies have been installed in the PCs of the labs. You may 
@@ -37,7 +37,7 @@ from stable_baselines3 import DQN,A2C,PPO
 from stable_baselines3.common.evaluation import evaluate_policy
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
-from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT, RIGHT_ONLY
+from gym_super_mario_bros.actions import RIGHT_ONLY
 from stable_baselines3.common import atari_wrappers
 
 # Path to the TensorBoard log directory
@@ -140,7 +140,6 @@ mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episode
 print("EVALUATION: mean_reward=%s std_reward=%s" % (mean_reward, std_reward))
 
 # visualise the agent's learnt behaviour.
-data_batch_size = 1000  # Write to the file every 1000 episodes
 steps_per_episode = 0
 reward_per_episode = 0
 total_cummulative_reward = 0
