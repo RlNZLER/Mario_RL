@@ -42,7 +42,7 @@ from stable_baselines3.common import atari_wrappers
 
 # Path to the TensorBoard log directory
 tensorboard_log_dir = "tensorboard_log"
-
+    
 # Start TensorBoard as a background process
 tensorboard_process = subprocess.Popen(
     ['tensorboard', '--logdir', tensorboard_log_dir],
